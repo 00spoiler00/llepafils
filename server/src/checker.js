@@ -4,7 +4,8 @@
 
 import { aplicaReglesIA, WHITELIST_PER_DEFECTE } from './ia-rules.js';
 
-const LT_URL = process.env.LT_URL || 'http://localhost:8010';
+// 127.0.0.1 i no localhost: el fetch de Node prova primer ::1 i LT només escolta IPv4.
+const LT_URL = process.env.LT_URL || 'http://127.0.0.1:8010';
 export const MAX_TEXT = 20000;
 
 // Regles de LanguageTool que marquen paraules desconegudes (ortografia).
@@ -51,7 +52,7 @@ export async function revisa(text, ignora = []) {
     throw new Error('Cal un camp "text" amb contingut.');
   }
   if (text.length > MAX_TEXT) {
-    throw new Error(`El text supera el límit de ${MAX_TEXT} caràcters. Revisa\'l per parts.`);
+    throw new Error(`El text supera el límit de ${MAX_TEXT} caràcters. Revisa'l per parts.`);
   }
 
   const ignoraSet = new Set(ignora.map((s) => String(s).toLowerCase()));
@@ -65,11 +66,10 @@ export async function revisa(text, ignora = []) {
     .filter((e) => {
       const frag = e.fragment.toLowerCase();
       if (ignoraSet.has(frag) || ignoraSet.has(e.regla.toLowerCase())) return false;
-      if (REGLES_ORTOGRAFIA.has(e.regla)) {
-        if (WHITELIST_PER_DEFECTE.has(frag)) return false;
-        if (esNomPropiProbable(text, e.offset, e.fragment)) return false;
+      if (REGLES_ORTOGRAFIA.has(e.regla) && esNomPropiProbable(text, e.offset, e.fragment)) {
+        return false;
       }
-      // Termes de la whitelist marcats per regles gramaticals que ensopeguen amb anglicismes.
+      // Termes tècnics de la whitelist, marcats per la regla que sigui.
       if (WHITELIST_PER_DEFECTE.has(frag)) return false;
       return true;
     })

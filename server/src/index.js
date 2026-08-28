@@ -1,6 +1,10 @@
 // El llepafils: servidor MCP (streamable HTTP) + API REST + landing.
 // L'MCP i l'API comparteixen el mateix nucli (checker.js).
 
+import { webcrypto } from 'node:crypto';
+// Node 18 (el de la VM) no exposa crypto com a global i l'SDK d'MCP el necessita.
+if (!globalThis.crypto) globalThis.crypto = webcrypto;
+
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { dirname, join } from 'node:path';
