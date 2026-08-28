@@ -1,0 +1,21 @@
+{
+  "name": "llepafils-server",
+  "version": "0.1.0",
+  "description": "El llepafils: validador de català per a IA. Servidor MCP + API REST sobre LanguageTool i regles pròpies anti-IA-ismes.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "LT_URL=http://localhost:8010 PORT=3737 node src/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "zod": "^3.23.8"
+  }
+}

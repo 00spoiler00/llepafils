@@ -1,0 +1,22 @@
+{
+  "name": "llepafils",
+  "owner": {
+    "name": "Marc Boada",
+    "url": "https://github.com/00spoiler00"
+  },
+  "metadata": {
+    "description": "El llepafils: validador de català per a text generat per IA. Normativa (LanguageTool) + regles pròpies contra IA-ismes.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "llepafils",
+      "source": "./plugins/llepafils",
+      "description": "Garanteix un català correcte en els lliurables que escriu la IA: valida amb LanguageTool i regles anti-IA-ismes fins que el text queda net.",
+      "version": "0.1.0",
+      "author": { "name": "Marc Boada" },
+      "homepage": "https://llepafils.latrup.net",
+      "keywords": ["català", "correcció", "languagetool", "qualitat", "mcp"]
+    }
+  ]
+}

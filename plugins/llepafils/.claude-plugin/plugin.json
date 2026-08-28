@@ -1,0 +1,7 @@
+{
+  "name": "llepafils",
+  "description": "Validador de català per a IA: revisa els lliurables en català amb LanguageTool i regles anti-IA-ismes fins que queden nets.",
+  "version": "0.1.0",
+  "author": { "name": "Marc Boada" },
+  "homepage": "https://llepafils.latrup.net"
+}

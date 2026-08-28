@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>llepafils — validador de català per a IA</title>
+<meta name="description" content="El llepafils garanteix un català correcte en el text que generen les IA: LanguageTool més regles pròpies contra IA-ismes. MCP, plugin de Claude Code i API REST.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FBFAF6;
+    --tinta: #1C1C1A;
+    --vermell: #C22F2F;
+    --blau: #2B4B8C;
+    --llapis: #8A8578;
+    --regle: #E4E0D4;
+    --paper-fosc: #F3F1E9;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--tinta);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  ::selection { background: var(--vermell); color: var(--paper); }
+  a { color: var(--blau); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:focus-visible, button:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--blau); outline-offset: 3px;
+  }
+  .contenidor { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* ── Capçalera ── */
+  header {
+    border-bottom: 1px solid var(--regle);
+    padding: 1.1rem 0;
+  }
+  header .contenidor { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .marca { font-family: 'Instrument Serif', serif; font-size: 1.5rem; color: var(--tinta); text-decoration: none; }
+  .marca .punt { color: var(--vermell); }
+  nav { display: flex; gap: 1.4rem; font-size: .95rem; }
+  nav a { color: var(--tinta); text-decoration: none; }
+  nav a:hover { color: var(--vermell); }
+
+  /* ── Hero: entrada de diccionari ── */
+  .entrada { padding: 5rem 0 3.5rem; }
+  .lema {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3.2rem, 9vw, 5.8rem);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .lema .punt { color: var(--vermell); }
+  .fonetica { font-family: 'IBM Plex Mono', monospace; color: var(--llapis); font-size: .95rem; margin-top: .8rem; }
+  .fonetica .gram { font-style: italic; font-family: 'Source Serif 4', serif; }
+  dl.accepcions { margin-top: 2.2rem; max-width: 620px; }
+  dl.accepcions > div { display: grid; grid-template-columns: 2.2rem 1fr; margin-bottom: 1.3rem; }
+  dl.accepcions dt { font-family: 'IBM Plex Mono', monospace; color: var(--vermell); font-size: .9rem; padding-top: .25rem; }
+  dl.accepcions .marca-camp { font-variant: small-caps; letter-spacing: .06em; color: var(--blau); }
+  .exemple { color: var(--llapis); font-style: italic; }
+  .exemple .malament { text-decoration: none; position: relative; white-space: nowrap; }
+  .exemple .malament .ratlla {
+    position: absolute; left: 0; right: 0; top: 55%; height: 2px;
+    background: var(--vermell); transform: scaleX(0); transform-origin: left;
+  }
+  .exemple .esmena {
+    color: var(--vermell); font-style: normal;
+    font-family: 'Instrument Serif', serif;
+    opacity: 0; white-space: nowrap;
+  }
+  .corregit .ratlla { transition: transform .5s ease .8s; transform: scaleX(1); }
+  .corregit .esmena { transition: opacity .5s ease 1.4s; opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .exemple .malament .ratlla { transform: scaleX(1); transition: none; }
+    .exemple .esmena { opacity: 1; transition: none; }
+  }
+
+  /* ── Seccions ── */
+  section { padding: 3.2rem 0; border-top: 1px solid var(--regle); }
+  h2 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 2rem;
+    margin-bottom: 1.6rem;
+  }
+  h2 .num { color: var(--llapis); font-size: 1.1rem; vertical-align: super; }
+
+  /* ── Demo ── */
+  .demo textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 1rem 1.1rem;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--tinta);
+    background: #fff;
+    border: 1px solid var(--regle);
+    border-radius: 2px;
+    resize: vertical;
+  }
+  .demo-accions { display: flex; align-items: center; gap: 1rem; margin-top: .9rem; flex-wrap: wrap; }
+  .boto {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .95rem;
+    background: var(--tinta);
+    color: var(--paper);
+    border: none;
+    padding: .65rem 1.4rem;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .boto:hover { background: var(--vermell); }
+  .boto[disabled] { opacity: .5; cursor: wait; }
+  .veredicte { font-family: 'IBM Plex Mono', monospace; font-size: .9rem; }
+  .veredicte.net { color: #2E7D32; }
+  .veredicte.errors { color: var(--vermell); }
+  .resultat { margin-top: 1.4rem; }
+  .text-marcat {
+    background: #fff; border: 1px solid var(--regle); border-radius: 2px;
+    padding: 1rem 1.1rem; white-space: pre-wrap;
+  }
+  .text-marcat mark {
+    background: transparent;
+    color: inherit;
+    text-decoration: underline wavy var(--vermell) 1.5px;
+    text-underline-offset: 4px;
+  }
+  ul.esmenes { list-style: none; margin-top: 1rem; }
+  ul.esmenes li {
+    display: grid; grid-template-columns: auto 1fr; gap: .8rem;
+    padding: .7rem 0; border-bottom: 1px dotted var(--regle);
+    font-size: .98rem;
+  }
+  ul.esmenes .frag {
+    font-family: 'IBM Plex Mono', monospace; font-size: .85rem;
+    color: var(--vermell); white-space: nowrap;
+  }
+  ul.esmenes .sugg { color: var(--blau); font-style: italic; }
+  ul.esmenes .font-regla { color: var(--llapis); font-size: .8rem; font-family: 'IBM Plex Mono', monospace; }
+
+  /* ── Com funciona ── */
+  .capes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .capa { background: var(--paper-fosc); padding: 1.4rem 1.3rem; border-radius: 2px; }
+  .capa h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.25rem; margin-bottom: .5rem; }
+  .capa p { font-size: .95rem; color: #444; }
+  .capa .etiqueta { font-family: 'IBM Plex Mono', monospace; font-size: .75rem; color: var(--llapis); display: block; margin-bottom: .7rem; }
+  @media (max-width: 700px) { .capes { grid-template-columns: 1fr; } }
+
+  /* ── Instal·lació ── */
+  .via { margin-bottom: 2rem; }
+  .via h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.3rem; margin-bottom: .6rem; }
+  pre {
+    background: var(--tinta); color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace; font-size: .88rem;
+    padding: 1rem 1.2rem; border-radius: 2px;
+    overflow-x: auto; line-height: 1.7;
+  }
+  pre .c { color: #9a968a; }
+  .nota { font-size: .92rem; color: var(--llapis); margin-top: .5rem; }
+
+  /* ── Peu ── */
+  footer { border-top: 1px solid var(--regle); padding: 2.5rem 0 3rem; font-size: .92rem; color: var(--llapis); }
+  footer .contenidor { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="contenidor">
+    <a class="marca" href="/">lle<span class="punt">·</span>pa<span class="punt">·</span>fils</a>
+    <nav>
+      <a href="#demo">Prova&#8217;l</a>
+      <a href="#installa">Instal·la&#8217;l</a>
+      <a href="https://github.com/00spoiler00/llepafils">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="contenidor">
+    <div class="entrada">
+      <h1 class="lema">lle<span class="punt">·</span>pa<span class="punt">·</span>fils</h1>
+      <p class="fonetica">[ʎepəfíls] <span class="gram">m. i f. invariable</span></p>
+      <dl class="accepcions">
+        <div>
+          <dt>1</dt>
+          <dd>Persona excessivament primmirada, que troba defectes a tot allò que li posen al davant.</dd>
+        </div>
+        <div>
+          <dt>2</dt>
+          <dd><span class="marca-camp">inform.</span> Validador de català per a text generat per intel·ligència artificial. Combina la normativa de LanguageTool amb regles pròpies contra calcs de l&#8217;anglès, clixés i crosses. <span class="exemple" id="exemple">«Passa-ho pel llepafils, que això no <span class="malament">fa sentit<span class="ratlla"></span></span> <span class="esmena">té sentit</span>.»</span></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <section id="demo" class="demo">
+    <div class="contenidor">
+      <h2>Posa&#8217;l a prova</h2>
+      <textarea id="text-prova" spellcheck="false" aria-label="Text en català per revisar">Estem emocionats d'anunciar la nova fulla de ruta — un pla que fa sentit i que suporta tots els casos d'ús. És important destacar que tenim que validar-ho tot.</textarea>
+      <div class="demo-accions">
+        <button class="boto" id="boto-revisa">Revisa</button>
+        <span class="veredicte" id="veredicte" role="status"></span>
+      </div>
+      <div class="resultat" id="resultat" hidden>
+        <div class="text-marcat" id="text-marcat"></div>
+        <ul class="esmenes" id="esmenes"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="contenidor">
+      <h2>Tres capes de mala bava</h2>
+      <div class="capes">
+        <div class="capa">
+          <span class="etiqueta">capa 1 · determinista</span>
+          <h3>LanguageTool</h3>
+          <p>Ortografia, gramàtica, barbarismes, apostrofació, concordances. El conjunt de regles de català més complet que existeix, servit en local: cap dada surt cap a tercers.</p>
+        </div>
+        <div class="capa">
+          <span class="etiqueta">capa 2 · determinista</span>
+          <h3>Regles anti-IA-ismes</h3>
+          <p>El que cap corrector marca i tot text d&#8217;IA porta: «fa sentit», «en línia amb», incisos amb guió llarg, «és important destacar que», clixés d&#8217;era digital. Regles pròpies validades amb corpus.</p>
+        </div>
+        <div class="capa">
+          <span class="etiqueta">capa 3 · criteri</span>
+          <h3>El model</h3>
+          <p>La skill del plugin fa que la IA corregeixi amb context, vigili els pronoms febles i torni a validar fins que el veredicte és <em>net</em>. Els noms propis i el vocabulari tècnic no es toquen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="installa">
+    <div class="contenidor">
+      <h2>Instal·la&#8217;l</h2>
+
+      <div class="via">
+        <h3>Plugin de Claude Code (recomanat)</h3>
+        <pre>/plugin marketplace add 00spoiler00/llepafils
+/plugin install llepafils@llepafils</pre>
+        <p class="nota">Inclou l&#8217;MCP i la skill que valida automàticament els lliurables en català.</p>
+      </div>
+
+      <div class="via">
+        <h3>Només l&#8217;MCP (Claude Code, Cursor, Claude Desktop…)</h3>
+        <pre>claude mcp add --transport http llepafils https://llepafils.latrup.net/mcp</pre>
+        <p class="nota">Exposa l&#8217;eina <code>revisa</code> a qualsevol client MCP.</p>
+      </div>
+
+      <div class="via">
+        <h3>API REST</h3>
+        <pre><span class="c"># POST /api/check → { veredicte, errors[], estadistiques }</span>
+curl -s https://llepafils.latrup.net/api/check \
+  -H 'Content-Type: application/json' \
+  -d '{"text": "Això no fa sentit."}'</pre>
+        <p class="nota">Límit de 20.000 caràcters per petició i 60 peticions per minut i IP.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="contenidor">
+    <span>Fet per Marc Boada amb LanguageTool i mala bava.</span>
+    <span><a href="https://github.com/00spoiler00/llepafils">Codi font</a> · <a href="/api/health">Estat del servei</a></span>
+  </div>
+</footer>
+
+<script>
+  // Animació d'esmena del hero
+  window.addEventListener('load', () => {
+    setTimeout(() => document.getElementById('exemple').classList.add('corregit'), 300);
+  });
+
+  // Demo en viu contra l'API real
+  const boto = document.getElementById('boto-revisa');
+  const areaText = document.getElementById('text-prova');
+  const veredicteEl = document.getElementById('veredicte');
+  const resultat = document.getElementById('resultat');
+  const textMarcat = document.getElementById('text-marcat');
+  const llista = document.getElementById('esmenes');
+
+  function escapa(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  boto.addEventListener('click', async () => {
+    const text = areaText.value;
+    if (!text.trim()) return;
+    boto.disabled = true;
+    veredicteEl.textContent = 'revisant…';
+    veredicteEl.className = 'veredicte';
+    try {
+      const res = await fetch('/api/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+
+      if (data.veredicte === 'net') {
+        veredicteEl.textContent = '✓ net. Ni una taca.';
+        veredicteEl.classList.add('net');
+        resultat.hidden = true;
+        return;
+      }
+
+      veredicteEl.textContent = `✗ ${data.estadistiques.total} esmenes (${data.estadistiques.normativa} de normativa, ${data.estadistiques.iaismes} d'IA-ismes)`;
+      veredicteEl.classList.add('errors');
+
+      let html = '';
+      let cursor = 0;
+      for (const e of data.errors) {
+        if (e.offset < cursor) continue;
+        html += escapa(text.slice(cursor, e.offset));
+        html += `<mark>${escapa(text.slice(e.offset, e.offset + e.longitud))}</mark>`;
+        cursor = e.offset + e.longitud;
+      }
+      html += escapa(text.slice(cursor));
+      textMarcat.innerHTML = html;
+
+      llista.innerHTML = data.errors.map((e) => `
+        <li>
+          <span class="frag">${escapa(e.fragment)}</span>
+          <span>${escapa(e.missatge)}
+            ${e.suggeriments.length ? `<span class="sugg">→ ${escapa(e.suggeriments.slice(0, 3).join(' · '))}</span>` : ''}
+            <span class="font-regla">${escapa(e.regla)}</span>
+          </span>
+        </li>`).join('');
+      resultat.hidden = false;
+    } catch (err) {
+      veredicteEl.textContent = 'El servei no respon. Torna-ho a provar d\'aquí a un moment.';
+      veredicteEl.classList.add('errors');
+    } finally {
+      boto.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
