@@ -1,3 +1,7 @@
 node_modules/
 *.log
 .DS_Store
+
+# Desplegament: rutes del servidor, àlies SSH i ports interns. No va al repo públic.
+deploy.sh
+deploy/

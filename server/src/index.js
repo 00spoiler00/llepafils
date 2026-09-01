@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3737;
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
-app.set('trust proxy', 1); // darrere l'Apache de latrup
+app.set('trust proxy', 1); // darrere el reverse proxy
 app.use(express.json({ limit: '64kb' }));
 
 const limiter = rateLimit({

@@ -60,7 +60,6 @@ Límits: 20.000 caràcters per petició, 60 peticions per minut i IP.
 server/          Servidor Node: MCP (streamable HTTP a /mcp), API REST (/api/check) i landing
 plugins/         Plugin de Claude Code (skill + configuració MCP)
 corpus/          Corpus d'avaluació i script de mesura de cobertura
-deploy/          Configuració d'Apache i PM2 per al desplegament
 ```
 
 ## Corpus d'avaluació
@@ -97,7 +96,7 @@ cd server && npm install && npm run dev   # http://localhost:3737
 
 ## Desplegament
 
-`./deploy.sh` sincronitza el projecte a la VM i recarrega els processos PM2 (`llepafils-lt` i `llepafils-server`). L'Apache fa de reverse proxy amb TLS de Let's Encrypt (vegeu `deploy/`).
+El servei públic corre en una VM pròpia: LanguageTool i el servidor Node com a dos processos gestionats amb PM2, darrere un reverse proxy amb TLS. La configuració concreta del desplegament (rutes, ports interns) no forma part del repo.
 
 ## Llicència
 
