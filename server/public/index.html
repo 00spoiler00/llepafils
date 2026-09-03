@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>llepafils — validador de català per a IA</title>
-<meta name="description" content="El llepafils garanteix un català correcte en el text que generen les IA: LanguageTool més regles pròpies contra IA-ismes. MCP, plugin de Claude Code i API REST.">
+<title>llepafils — corrector de català per a la teva IA</title>
+<meta name="description" content="El llepafils fa que el català que t'escriu ChatGPT o Claude surti net: LanguageTool més regles pròpies contra IA-ismes. Es connecta en cinc minuts, sense saber programar.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧐</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,9 +30,10 @@
   }
   ::selection { background: var(--vermell); color: var(--paper); }
   a { color: var(--blau); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  a:focus-visible, button:focus-visible, textarea:focus-visible {
+  a:focus-visible, button:focus-visible, textarea:focus-visible, summary:focus-visible {
     outline: 2px solid var(--blau); outline-offset: 3px;
   }
+  code { font-family: 'IBM Plex Mono', monospace; font-size: .9em; }
   .contenidor { max-width: 880px; margin: 0 auto; padding: 0 1.5rem; }
 
   /* ── Capçalera ── */
@@ -43,7 +44,7 @@
   header .contenidor { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   .marca { font-family: 'Instrument Serif', serif; font-size: 1.5rem; color: var(--tinta); text-decoration: none; }
   .marca .punt { color: var(--vermell); }
-  nav { display: flex; gap: 1.4rem; font-size: .95rem; }
+  nav { display: flex; gap: 1.4rem; font-size: .95rem; flex-wrap: wrap; }
   nav a { color: var(--tinta); text-decoration: none; }
   nav a:hover { color: var(--vermell); }
 
@@ -81,6 +82,23 @@
     .exemple .malament .ratlla { transform: scaleX(1); transition: none; }
     .exemple .esmena { opacity: 1; transition: none; }
   }
+  .crida {
+    margin-top: 2.4rem; max-width: 620px;
+    font-size: 1.2rem; line-height: 1.5;
+  }
+  .crida-accions { margin-top: 1.4rem; display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
+  .boto-enllac {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .95rem;
+    background: var(--tinta);
+    color: var(--paper);
+    text-decoration: none;
+    padding: .7rem 1.5rem;
+    border-radius: 2px;
+  }
+  .boto-enllac:hover { background: var(--vermell); }
+  .crida-accions a.secundari { color: var(--llapis); font-size: .95rem; }
 
   /* ── Seccions ── */
   section { padding: 3.2rem 0; border-top: 1px solid var(--regle); }
@@ -88,9 +106,10 @@
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
     font-size: 2rem;
-    margin-bottom: 1.6rem;
+    margin-bottom: 1.2rem;
   }
-  h2 .num { color: var(--llapis); font-size: 1.1rem; vertical-align: super; }
+  .intro { max-width: 680px; margin-bottom: 1.6rem; }
+  .intro + .intro { margin-top: -.6rem; }
 
   /* ── Demo ── */
   .demo textarea {
@@ -145,6 +164,7 @@
   }
   ul.esmenes .sugg { color: var(--blau); font-style: italic; }
   ul.esmenes .font-regla { color: var(--llapis); font-size: .8rem; font-family: 'IBM Plex Mono', monospace; }
+  .peu-demo { margin-top: 1.2rem; font-size: .95rem; color: var(--llapis); max-width: 680px; }
 
   /* ── Com funciona ── */
   .capes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
@@ -152,11 +172,64 @@
   .capa h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.25rem; margin-bottom: .5rem; }
   .capa p { font-size: .95rem; color: #444; }
   .capa .etiqueta { font-family: 'IBM Plex Mono', monospace; font-size: .75rem; color: var(--llapis); display: block; margin-bottom: .7rem; }
+  .capa.aqui-no { border: 1px dashed var(--llapis); background: transparent; }
   @media (max-width: 700px) { .capes { grid-template-columns: 1fr; } }
 
   /* ── Instal·lació ── */
+  .adreca {
+    display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+    background: var(--tinta); color: var(--paper);
+    padding: .8rem 1rem; border-radius: 2px; margin: 1rem 0 2rem;
+  }
+  .adreca code { font-size: .95rem; word-break: break-all; flex: 1; min-width: 200px; }
+  .copia {
+    font-family: 'IBM Plex Mono', monospace; font-size: .8rem;
+    background: transparent; color: var(--paper);
+    border: 1px solid #6d6a60; padding: .35rem .8rem; border-radius: 2px; cursor: pointer;
+  }
+  .copia:hover { border-color: var(--paper); }
+  .copia.fet { color: #9BE29B; border-color: #9BE29B; }
+
+  details.client { border-top: 1px solid var(--regle); }
+  details.client:last-of-type { border-bottom: 1px solid var(--regle); }
+  details.client summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem .2rem;
+    font-family: 'Instrument Serif', serif; font-size: 1.5rem;
+  }
+  details.client summary::-webkit-details-marker { display: none; }
+  details.client summary .estat {
+    font-family: 'IBM Plex Mono', monospace; font-size: .78rem; color: var(--llapis);
+    white-space: nowrap;
+  }
+  details.client summary .estat.no { color: var(--vermell); }
+  details.client summary::before {
+    content: '+'; font-family: 'IBM Plex Mono', monospace; color: var(--vermell);
+    margin-right: .8rem; font-size: 1.2rem; flex: 0 0 auto;
+  }
+  details.client[open] summary::before { content: '−'; }
+  details.client summary .titol { flex: 1; }
+  .cos-client { padding: 0 .2rem 1.8rem 2.3rem; max-width: 720px; }
+  @media (max-width: 600px) { .cos-client { padding-left: .2rem; } }
+  .requisit {
+    background: var(--paper-fosc); padding: .9rem 1.1rem; border-radius: 2px;
+    font-size: .95rem; margin-bottom: 1.2rem;
+  }
+  .requisit strong { font-weight: 600; }
+  ol.passos { padding-left: 1.4rem; }
+  ol.passos li { margin-bottom: .7rem; }
+  ol.passos li::marker { font-family: 'IBM Plex Mono', monospace; color: var(--vermell); }
+  .menu { font-weight: 600; }
+  .camp { display: grid; grid-template-columns: auto 1fr; gap: .3rem 1rem; margin: .5rem 0 .3rem; font-size: .95rem; }
+  .camp dt { font-family: 'IBM Plex Mono', monospace; font-size: .82rem; color: var(--llapis); padding-top: .15rem; }
+  .font-doc { font-size: .85rem; color: var(--llapis); margin-top: 1.2rem; }
+  .nota { font-size: .92rem; color: var(--llapis); margin-top: .5rem; }
+  .encara-no p { max-width: 680px; }
+  .encara-no p + p { margin-top: .7rem; }
+
   .via { margin-bottom: 2rem; }
-  .via h3 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.3rem; margin-bottom: .6rem; }
+  .via h4 { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.25rem; margin-bottom: .6rem; }
   pre {
     background: var(--tinta); color: var(--paper);
     font-family: 'IBM Plex Mono', monospace; font-size: .88rem;
@@ -164,7 +237,30 @@
     overflow-x: auto; line-height: 1.7;
   }
   pre .c { color: #9a968a; }
-  .nota { font-size: .92rem; color: var(--llapis); margin-top: .5rem; }
+
+  /* ── Com es fa servir ── */
+  .frase {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--regle); border-radius: 2px;
+    padding: .9rem 1.1rem; margin: 1rem 0 1.6rem; max-width: 680px;
+  }
+  .frase q { font-family: 'Instrument Serif', serif; font-size: 1.35rem; flex: 1; }
+  .frase .copia { color: var(--tinta); border-color: var(--regle); }
+  .frase .copia:hover { border-color: var(--tinta); }
+  .frase .copia.fet { color: #2E7D32; border-color: #2E7D32; }
+  .instruccio {
+    background: #fff; border: 1px solid var(--regle); border-radius: 2px;
+    padding: 1rem 1.1rem; margin: 1rem 0 .8rem; max-width: 680px;
+    display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: start;
+  }
+  .instruccio p { font-size: 1rem; }
+  .instruccio .copia { color: var(--tinta); border-color: var(--regle); }
+  .instruccio .copia:hover { border-color: var(--tinta); }
+  .instruccio .copia.fet { color: #2E7D32; border-color: #2E7D32; }
+  @media (max-width: 600px) { .instruccio { grid-template-columns: 1fr; } }
+  h3.sub { font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 1.5rem; margin: 2.4rem 0 .8rem; }
+  .us p { max-width: 680px; }
+  .us p + p { margin-top: .8rem; }
 
   /* ── Peu ── */
   footer { border-top: 1px solid var(--regle); padding: 2.5rem 0 3rem; font-size: .92rem; color: var(--llapis); }
@@ -179,6 +275,7 @@
     <nav>
       <a href="#demo">Prova&#8217;l</a>
       <a href="#installa">Instal·la&#8217;l</a>
+      <a href="#us">Com es fa servir</a>
       <a href="https://github.com/00spoiler00/llepafils">GitHub</a>
     </nav>
   </div>
@@ -196,15 +293,21 @@
         </div>
         <div>
           <dt>2</dt>
-          <dd><span class="marca-camp">inform.</span> Validador de català per a text generat per intel·ligència artificial. Combina la normativa de LanguageTool amb regles pròpies contra calcs de l&#8217;anglès, clixés i crosses. <span class="exemple" id="exemple">«Passa-ho pel llepafils, que això no <span class="malament">fa sentit<span class="ratlla"></span></span> <span class="esmena">té sentit</span>.»</span></dd>
+          <dd><span class="marca-camp">inform.</span> Corrector de català per a text generat per intel·ligència artificial. Combina la normativa de LanguageTool amb regles pròpies contra calcs de l&#8217;anglès, clixés i crosses. <span class="exemple" id="exemple">«Passa-ho pel llepafils, que això no <span class="malament">fa sentit<span class="ratlla"></span></span> <span class="esmena">té sentit</span>.»</span></dd>
         </div>
       </dl>
+      <p class="crida">Connecta&#8217;l al ChatGPT o al Claude que ja fas servir i el català que t&#8217;escriuen sortirà net. Es fa en cinc minuts i no cal saber programar.</p>
+      <div class="crida-accions">
+        <a class="boto-enllac" href="#installa">Instal·la&#8217;l</a>
+        <a class="secundari" href="#demo">O prova&#8217;l primer aquí sota</a>
+      </div>
     </div>
   </div>
 
   <section id="demo" class="demo">
     <div class="contenidor">
-      <h2>Posa&#8217;l a prova</h2>
+      <h2>Prova el corrector</h2>
+      <p class="intro">Aquesta caixa fa la part que <strong>troba</strong> els errors: la normativa i els IA-ismes. La part que els <strong>corregeix</strong> amb criteri la fa la teva IA quan l&#8217;hi tens connectat, i aquí no hi és. Escriu-hi o enganxa-hi un text i mira què hi troba.</p>
       <textarea id="text-prova" spellcheck="false" aria-label="Text en català per revisar">Estem emocionats d'anunciar la nova fulla de ruta — un pla que fa sentit i que suporta tots els casos d'ús. És important destacar que tenim que validar-ho tot.</textarea>
       <div class="demo-accions">
         <button class="boto" id="boto-revisa">Revisa</button>
@@ -214,6 +317,7 @@
         <div class="text-marcat" id="text-marcat"></div>
         <ul class="esmenes" id="esmenes"></ul>
       </div>
+      <p class="peu-demo">Cada error que veus aquí és el que rep la IA quan li demanes que passi el text pel llepafils. Ella tria l&#8217;esmena que encaixa amb el context i torna a comprovar-ho fins que no en queda cap.</p>
     </div>
   </section>
 
@@ -231,10 +335,10 @@
           <h3>Regles anti-IA-ismes</h3>
           <p>El que cap corrector marca i tot text d&#8217;IA porta: «fa sentit», «en línia amb», incisos amb guió llarg, «és important destacar que», clixés d&#8217;era digital. Regles pròpies validades amb corpus.</p>
         </div>
-        <div class="capa">
-          <span class="etiqueta">capa 3 · criteri</span>
+        <div class="capa aqui-no">
+          <span class="etiqueta">capa 3 · criteri · passa a la teva IA, no aquí</span>
           <h3>El model</h3>
-          <p>La skill del plugin fa que la IA corregeixi amb context, vigili els pronoms febles i torni a validar fins que el veredicte és <em>net</em>. Els noms propis i el vocabulari tècnic no es toquen.</p>
+          <p>Quan hi tens el llepafils connectat, el teu ChatGPT o Claude corregeix amb context, vigila els pronoms febles i torna a validar fins que el veredicte és <em>net</em>. Els noms propis i el vocabulari tècnic no es toquen.</p>
         </div>
       </div>
     </div>
@@ -243,28 +347,140 @@
   <section id="installa">
     <div class="contenidor">
       <h2>Instal·la&#8217;l</h2>
+      <p class="intro">El llepafils és un <strong>connector</strong>: una adreça que dones a la teva IA perquè li pugui consultar els textos. No s&#8217;instal·la res a l&#8217;ordinador. L&#8217;adreça és sempre la mateixa:</p>
+      <div class="adreca">
+        <code id="url-mcp">https://llepafils.latrup.net/mcp</code>
+        <button class="copia" data-copia="url-mcp" type="button">Copia</button>
+      </div>
+      <p class="intro">Tria l&#8217;aplicació que fas servir:</p>
 
-      <div class="via">
-        <h3>Plugin de Claude Code (recomanat)</h3>
-        <pre>/plugin marketplace add 00spoiler00/llepafils
+      <details class="client" id="chatgpt">
+        <summary><span class="titol">ChatGPT</span><span class="estat">amb Pro o compte d&#8217;empresa</span></summary>
+        <div class="cos-client">
+          <div class="requisit">
+            <strong>Cal:</strong> ChatGPT Pro, o un compte Business o Enterprise on l&#8217;administrador hagi activat el mode desenvolupador. La documentació oficial no preveu Free, Go ni Plus; si tens Plus, mira si et surt l&#8217;opció del pas 2. Es configura i es fa servir des del web (chatgpt.com), no des de l&#8217;app del mòbil.
+          </div>
+          <ol class="passos">
+            <li>Obre <a href="https://chatgpt.com">chatgpt.com</a>, clica el teu nom (a baix a l&#8217;esquerra) i entra a <span class="menu">Settings</span> (Configuració).</li>
+            <li>Ves a <span class="menu">Apps › Advanced settings</span> i activa <span class="menu">Developer mode</span>.</li>
+            <li>Torna a <span class="menu">Apps</span> i clica <span class="menu">Create</span>.</li>
+            <li>Omple el formulari:
+              <dl class="camp">
+                <dt>Name</dt><dd>llepafils</dd>
+                <dt>Description</dt><dd>Corrector de català. Fes-lo servir abans de lliurar qualsevol text en català.</dd>
+                <dt>MCP server URL</dt><dd><code>https://llepafils.latrup.net/mcp</code></dd>
+                <dt>Authentication</dt><dd>No authentication</dd>
+              </dl>
+            </li>
+            <li>Clica <span class="menu">Scan tools</span>, espera que trobi l&#8217;eina <code>revisa</code> i clica <span class="menu">Create</span>.</li>
+            <li>En un xat nou, obre el menú d&#8217;eines (el <span class="menu">+</span> de la caixa d&#8217;escriure) i tria <span class="menu">llepafils</span>, o simplement anomena&#8217;l al missatge: «Passa-ho pel llepafils».</li>
+          </ol>
+          <p class="nota">A ChatGPT, l&#8217;app s&#8217;aplica al missatge on la tries o l&#8217;anomenes, no a tota la conversa. Per comentar uns resultats que ja són al xat no cal tornar-la a triar; per revisar un text nou, sí.</p>
+          <p class="font-doc">Passos segons la <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt">documentació oficial d&#8217;OpenAI</a>, consultada el 3 de setembre de 2026. Si el menú no coincideix, és que l&#8217;han mogut: busca «Developer mode» dins d&#8217;Apps.</p>
+        </div>
+      </details>
+
+      <details class="client" id="claude">
+        <summary><span class="titol">Claude</span><span class="estat">qualsevol pla, també el gratuït</span></summary>
+        <div class="cos-client">
+          <div class="requisit">
+            <strong>Cal:</strong> un compte de Claude. Amb el pla gratuït pots tenir un connector personalitzat (aquest). Funciona al web (claude.ai), a l&#8217;app d&#8217;escriptori i a la del mòbil.
+          </div>
+          <ol class="passos">
+            <li>Obre <a href="https://claude.ai">claude.ai</a> i, al menú de baix a l&#8217;esquerra, entra a <span class="menu">Customize › Connectors</span> (Personalitza › Connectors).</li>
+            <li>Clica el <span class="menu">+</span> i tria <span class="menu">Add custom connector</span>.</li>
+            <li>Omple el formulari i clica <span class="menu">Add</span>:
+              <dl class="camp">
+                <dt>Name</dt><dd>llepafils</dd>
+                <dt>Remote MCP server URL</dt><dd><code>https://llepafils.latrup.net/mcp</code></dd>
+                <dt>Advanced settings</dt><dd>deixa-ho buit</dd>
+              </dl>
+            </li>
+            <li>En un xat, clica el <span class="menu">+</span> de la caixa d&#8217;escriure, ves a <span class="menu">Connectors</span> i activa <span class="menu">llepafils</span>. A partir d&#8217;aquí, Claude el fa servir quan li ho demanes.</li>
+          </ol>
+          <p class="nota">Als plans Team i Enterprise, el connector l&#8217;ha d&#8217;afegir primer un propietari des de la configuració de l&#8217;organització (Organization settings › Connectors › Add › Custom). Després, cada persona l&#8217;activa al seu xat.</p>
+          <p class="font-doc">Passos segons la <a href="https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp">documentació oficial d&#8217;Anthropic</a>, consultada el 3 de setembre de 2026.</p>
+        </div>
+      </details>
+
+      <details class="client" id="copilot">
+        <summary><span class="titol">Microsoft Copilot</span><span class="estat no">encara no</span></summary>
+        <div class="cos-client encara-no">
+          <p>L&#8217;app de Copilot per a comptes personals (Microsoft, Google o Apple) no admet connectors externs, així que de moment no s&#8217;hi pot afegir el llepafils.</p>
+          <p>A la feina, amb Microsoft 365 Copilot, sí que és possible, però ho ha de fer l&#8217;administrador de l&#8217;organització des de <a href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent">Copilot Studio</a>, no tu. Si t&#8217;interessa, passa-li aquesta pàgina.</p>
+          <p>Mentrestant, fes servir la <a href="#demo">caixa de prova</a> d&#8217;aquí dalt: enganxa-hi el text que t&#8217;ha escrit Copilot i corregeix el que marqui.</p>
+        </div>
+      </details>
+
+      <details class="client" id="gemini">
+        <summary><span class="titol">Gemini</span><span class="estat no">encara no</span></summary>
+        <div class="cos-client encara-no">
+          <p>L&#8217;app de Gemini (gemini.google.com) per a comptes personals no admet connectors externs, així que de moment no s&#8217;hi pot afegir el llepafils.</p>
+          <p>Hi ha camí a <a href="https://support.google.com/g/answer/17106276">Gemini Enterprise</a> (l&#8217;afegeix l&#8217;administrador des de «Connected apps») i a la <a href="https://geminicli.com/docs/tools/mcp-server/">Gemini CLI</a>, pensada per a programadors.</p>
+          <p>Mentrestant, fes servir la <a href="#demo">caixa de prova</a> d&#8217;aquí dalt: enganxa-hi el text que t&#8217;ha escrit Gemini i corregeix el que marqui.</p>
+        </div>
+      </details>
+
+      <details class="client" id="desenvolupadors">
+        <summary><span class="titol">Per a desenvolupadors</span><span class="estat">Claude Code, Cursor, VS Code, API</span></summary>
+        <div class="cos-client">
+          <div class="via">
+            <h4>Plugin de Claude Code (recomanat)</h4>
+            <pre>/plugin marketplace add 00spoiler00/llepafils
 /plugin install llepafils@llepafils</pre>
-        <p class="nota">Inclou l&#8217;MCP i la skill que valida automàticament els lliurables en català.</p>
-      </div>
-
-      <div class="via">
-        <h3>Només l&#8217;MCP (Claude Code, Cursor, Claude Desktop…)</h3>
-        <pre>claude mcp add --transport http llepafils https://llepafils.latrup.net/mcp</pre>
-        <p class="nota">Exposa l&#8217;eina <code>revisa</code> a qualsevol client MCP.</p>
-      </div>
-
-      <div class="via">
-        <h3>API REST</h3>
-        <pre><span class="c"># POST /api/check → { veredicte, errors[], estadistiques }</span>
+            <p class="nota">Inclou l&#8217;MCP i la skill que valida automàticament els lliurables en català (correus, documents, README, missatges de commit, textos d&#8217;UI). És l&#8217;única via on el bucle de correcció es dispara sol.</p>
+          </div>
+          <div class="via">
+            <h4>Només l&#8217;MCP a Claude Code</h4>
+            <pre>claude mcp add --transport http llepafils https://llepafils.latrup.net/mcp</pre>
+          </div>
+          <div class="via">
+            <h4>Cursor</h4>
+            <pre><span class="c"># .cursor/mcp.json (del projecte) o ~/.cursor/mcp.json (global)</span>
+{ "mcpServers": { "llepafils": { "url": "https://llepafils.latrup.net/mcp" } } }</pre>
+          </div>
+          <div class="via">
+            <h4>VS Code (GitHub Copilot)</h4>
+            <pre><span class="c"># .vscode/mcp.json</span>
+{ "servers": { "llepafils": { "type": "http", "url": "https://llepafils.latrup.net/mcp" } } }</pre>
+            <p class="nota">Cal el mode agent del xat de Copilot. Qualsevol altre client MCP amb transport HTTP funciona igual: transport <em>streamable HTTP</em>, sense autenticació, una sola eina (<code>revisa</code>).</p>
+          </div>
+          <div class="via">
+            <h4>API REST</h4>
+            <pre><span class="c"># POST /api/check → { veredicte, errors[], estadistiques }</span>
 curl -s https://llepafils.latrup.net/api/check \
   -H 'Content-Type: application/json' \
-  -d '{"text": "Això no fa sentit."}'</pre>
-        <p class="nota">Límit de 20.000 caràcters per petició i 60 peticions per minut i IP.</p>
+  -d '{"text": "Això no fa sentit.", "ignora": ["NomPropi"]}'</pre>
+            <p class="nota">Límit de 20.000 caràcters per petició i 60 peticions per minut i IP. Detalls al <a href="https://github.com/00spoiler00/llepafils#api-rest">README</a>.</p>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section id="us" class="us">
+    <div class="contenidor">
+      <h2>Com es fa servir</h2>
+      <p>Un cop connectat, no notaràs res fins que li ho demanis. Quan la IA t&#8217;hagi escrit un text en català, digues-li:</p>
+      <div class="frase">
+        <q id="frase-us">Passa-ho pel llepafils.</q>
+        <button class="copia" data-copia="frase-us" type="button">Copia</button>
       </div>
+      <p>La IA envia el text al llepafils, rep la llista d&#8217;errors, els corregeix i el torna a enviar fins que el veredicte és <em>net</em>. Normalment són dues o tres passades. Pots demanar-li que et digui què ha canviat.</p>
+
+      <h3 class="sub">Perquè ho faci sol</h3>
+      <p>Si no vols haver-ho de demanar cada vegada, enganxa aquesta instrucció a les preferències de la teva IA (a ChatGPT, <span class="menu">Settings › Personalization › Custom instructions</span>; a Claude, <span class="menu">Settings › Profile</span>, a l&#8217;apartat de preferències):</p>
+      <div class="instruccio">
+        <p id="instruccio-text">Quan escriguis un text en català pensat per enviar-se o publicar-se (un correu, un document, un missatge, un article), passa&#8217;l pel llepafils i corregeix-lo fins que el veredicte sigui «net». No cal fer-ho amb les respostes de conversa.</p>
+        <button class="copia" data-copia="instruccio-text" type="button">Copia</button>
+      </div>
+      <p class="nota">La frase «pensat per enviar-se o publicar-se» és a posta: fa que només revisi el que sortirà de la conversa, no cada resposta. A ChatGPT, com que l&#8217;app només s&#8217;activa quan la tries al menú o l&#8217;anomenes, la instrucció hi té menys efecte que a Claude.</p>
+
+      <h3 class="sub">Què costa</h3>
+      <p>El servei és gratuït i sense registre. El que sí que gasta és quota de la teva IA: cada passada envia el text sencer al llepafils i rep la llista d&#8217;errors, i tot això s&#8217;afegeix a la conversa. Amb un correu de mitja pàgina no ho notaràs. Amb un document de deu pàgines revisat tres vegades, sí: la conversa s&#8217;omple més de pressa i, si el teu pla té límit de missatges, hi arribaràs abans. Per això la instrucció d&#8217;aquí dalt només demana revisar el que ha de sortir.</p>
+
+      <h3 class="sub">On va el text</h3>
+      <p>El text viatja al servidor del llepafils, es revisa i s&#8217;oblida: no es desa ni s&#8217;envia a cap tercer. LanguageTool funciona dins del mateix servidor. Com a qualsevol web, queden registrades l&#8217;adreça IP i l&#8217;hora de cada petició, i res més. El <a href="https://github.com/00spoiler00/llepafils">codi és públic</a> i ho pots comprovar.</p>
     </div>
   </section>
 </main>
@@ -281,6 +497,29 @@ curl -s https://llepafils.latrup.net/api/check \
   window.addEventListener('load', () => {
     setTimeout(() => document.getElementById('exemple').classList.add('corregit'), 300);
   });
+
+  // Botons "Copia"
+  document.querySelectorAll('.copia').forEach((b) => {
+    b.addEventListener('click', async () => {
+      const text = document.getElementById(b.dataset.copia).textContent.trim();
+      try {
+        await navigator.clipboard.writeText(text);
+        b.textContent = 'Copiat';
+        b.classList.add('fet');
+        setTimeout(() => { b.textContent = 'Copia'; b.classList.remove('fet'); }, 1800);
+      } catch {
+        b.textContent = 'Selecciona i copia';
+      }
+    });
+  });
+
+  // Obre el client de l'àncora si l'URL en porta un (#chatgpt, #claude…)
+  function obreAncora() {
+    const el = document.querySelector(`details.client${location.hash}`);
+    if (el) el.open = true;
+  }
+  obreAncora();
+  window.addEventListener('hashchange', obreAncora);
 
   // Demo en viu contra l'API real
   const boto = document.getElementById('boto-revisa');

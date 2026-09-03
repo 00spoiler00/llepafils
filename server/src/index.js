@@ -50,6 +50,9 @@ function creaServidorMcp() {
         'Retorna un veredicte ("net" o "errors") i la llista d\'errors amb posició, missatge i suggeriments. ' +
         'Corregeix i torna a cridar fins a obtenir "net". Fes servir "ignora" per a noms propis, ' +
         'termes tècnics justificats o identificadors de regla que no apliquin (p. ex. guions de diàleg).',
+      // Només llegeix: així els clients (ChatGPT, Claude) no demanen confirmació a cada crida
+      // i els plans que només permeten eines de lectura la deixen passar.
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       inputSchema: {
         text: z.string().max(MAX_TEXT).describe('El text en català a revisar.'),
         ignora: z

@@ -12,6 +12,12 @@ Servei públic a **https://llepafils.latrup.net** (gratuït, sense registre, 60 
 
 ## Instal·lació
 
+El llepafils és un servidor MCP (transport *streamable HTTP*, sense autenticació, una sola eina: `revisa`) a `https://llepafils.latrup.net/mcp`. Qualsevol client MCP s'hi pot connectar.
+
+### Si no ets programador
+
+Els passos per connectar-lo a ChatGPT o a Claude des de l'aplicació, en llenguatge planer i client per client, són a **https://llepafils.latrup.net#installa**. També hi diu quins clients encara no ho permeten (Copilot i Gemini per a comptes personals), què gasta i on va el text.
+
 ### Plugin de Claude Code (recomanat)
 
 ```
@@ -19,12 +25,26 @@ Servei públic a **https://llepafils.latrup.net** (gratuït, sense registre, 60 
 /plugin install llepafils@llepafils
 ```
 
-Inclou l'MCP i la skill que valida automàticament els lliurables en català (correus, documents, README, missatges de commit, textos d'UI).
+Inclou l'MCP i la skill que valida automàticament els lliurables en català (correus, documents, README, missatges de commit, textos d'UI). És l'única via on el bucle de correcció es dispara sol; als altres clients cal demanar-ho o afegir una instrucció a les preferències.
 
-### Només l'MCP (qualsevol client MCP)
+### Només l'MCP
+
+Claude Code:
 
 ```bash
 claude mcp add --transport http llepafils https://llepafils.latrup.net/mcp
+```
+
+Cursor (`.cursor/mcp.json` o `~/.cursor/mcp.json`):
+
+```json
+{ "mcpServers": { "llepafils": { "url": "https://llepafils.latrup.net/mcp" } } }
+```
+
+VS Code amb GitHub Copilot (`.vscode/mcp.json`):
+
+```json
+{ "servers": { "llepafils": { "type": "http", "url": "https://llepafils.latrup.net/mcp" } } }
 ```
 
 ### API REST
